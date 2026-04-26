@@ -1,0 +1,75 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Tags{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  {# New tag form #}
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <h2 class="text-sm font-semibold text-zinc-300 mb-5">{{ 'Modifier le tag' if tag is defined else 'Nouveau tag' }}</h2>
+    <form method="POST" novalidate class="space-y-4">
+      {{ form.hidden_tag() }}
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Nom *</label>
+        {{ form.name(id='tag-name', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors') }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Couleur hex</label>
+        <div class="flex gap-2">
+          {{ form.color(id='tag-color', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors', placeholder='#6366f1') }}
+          <input type="color" id="color-picker" value="#6366f1"
+                 class="w-12 h-12 rounded-xl border border-zinc-700 bg-zinc-800 cursor-pointer flex-shrink-0" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Slug</label>
+        {{ form.slug(id='tag-slug', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors', placeholder='auto-généré') }}
+      </div>
+      <button type="submit" id="save-tag-btn"
+              class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+        Enregistrer
+      </button>
+    </form>
+  </div>
+
+  {# Tags list #}
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-zinc-800">
+      <h2 class="text-sm font-semibold text-zinc-300">Tags existants ({{ tags|length }})</h2>
+    </div>
+    {% if tags %}
+    <ul class="divide-y divide-zinc-800">
+      {% for t in tags %}
+      <li class="flex items-center justify-between px-5 py-3 hover:bg-zinc-800/50 transition-colors">
+        <div class="flex items-center gap-2.5">
+          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ t.color }};"></span>
+          <span class="text-sm text-zinc-200 font-medium">{{ t.name }}</span>
+          <span class="text-xs text-zinc-600 font-mono">{{ t.slug }}</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="{{ url_for('admin_bp.tag_edit', id=t.id) }}"
+             class="text-xs text-brand-400 hover:text-brand-300 transition-colors">Modifier</a>
+          <form method="POST" action="{{ url_for('admin_bp.tag_delete', id=t.id) }}"
+                onsubmit="return confirm('Supprimer ce tag ?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="text-xs text-zinc-600 hover:text-red-400 transition-colors">✕</button>
+          </form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="px-5 py-10 text-center text-zinc-600 text-sm">Aucun tag.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const colorPicker = document.getElementById('color-picker');
+const colorInput = document.getElementById('tag-color');
+colorPicker.addEventListener('input', () => { colorInput.value = colorPicker.value; });
+colorInput.addEventListener('input', () => { colorPicker.value = colorInput.value; });
+</script>
+{% endblock %}

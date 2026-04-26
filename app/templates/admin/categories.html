@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Catégories{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  {# Form #}
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <h2 class="text-sm font-semibold text-zinc-300 mb-5">Nouvelle catégorie</h2>
+    <form method="POST" novalidate class="space-y-4">
+      {{ form.hidden_tag() }}
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Nom *</label>
+        {{ form.name(id='cat-name', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors') }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Description</label>
+        {{ form.description(id='cat-desc', rows=3, class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors resize-none') }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Slug</label>
+        {{ form.slug(id='cat-slug', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors', placeholder='auto-généré') }}
+      </div>
+      <button type="submit" id="save-cat-btn"
+              class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+        Enregistrer
+      </button>
+    </form>
+  </div>
+
+  {# List #}
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-zinc-800">
+      <h2 class="text-sm font-semibold text-zinc-300">Catégories ({{ categories|length }})</h2>
+    </div>
+    {% if categories %}
+    <ul class="divide-y divide-zinc-800">
+      {% for cat in categories %}
+      <li class="flex items-center justify-between px-5 py-3 hover:bg-zinc-800/50 transition-colors">
+        <div>
+          <p class="text-sm text-zinc-200 font-medium">{{ cat.name }}</p>
+          <p class="text-xs text-zinc-600 font-mono">{{ cat.slug }}</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-zinc-500">{{ cat.articles.count() }} articles</span>
+          <a href="{{ url_for('admin_bp.category_edit', id=cat.id) }}"
+             class="text-xs text-brand-400 hover:text-brand-300 transition-colors">Modifier</a>
+          <form method="POST" action="{{ url_for('admin_bp.category_delete', id=cat.id) }}"
+                onsubmit="return confirm('Supprimer cette catégorie ?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="text-xs text-zinc-600 hover:text-red-400 transition-colors">✕</button>
+          </form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="px-5 py-10 text-center text-zinc-600 text-sm">Aucune catégorie.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
