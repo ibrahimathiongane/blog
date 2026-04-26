@@ -2,33 +2,40 @@
 {% block page_title %}Modifier le tag{% endblock %}
 
 {% block content %}
-<div class="flex items-center gap-4 mb-6">
-  <a href="{{ url_for('admin_bp.tags_list') }}" class="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">← Tags</a>
+<div class="flex items-center gap-4 mb-8">
+  <a href="{{ url_for('admin_bp.tags_list') }}" class="w-8 h-8 rounded-lg bg-subtle flex items-center justify-center text-muted hover:text-accent transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+  </a>
+  <div class="h-4 w-px bg-border"></div>
+  <p class="text-xs font-black uppercase tracking-widest text-muted">Modifier le tag</p>
 </div>
+
 <div class="max-w-md">
-  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-    <h2 class="text-sm font-semibold text-zinc-300 mb-5">Modifier le tag</h2>
-    <form method="POST" novalidate class="space-y-4">
+  <div class="bg-surface border border-border rounded-[2rem] p-8 shadow-sm">
+    <form method="POST" novalidate class="space-y-6">
       {{ form.hidden_tag() }}
       <div>
-        <label class="block text-xs font-medium text-zinc-500 mb-2">Nom *</label>
-        {{ form.name(id='tag-name', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors') }}
+        <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-3">Nom *</label>
+        {{ form.name(id='tag-name', class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-accent transition-all') }}
       </div>
       <div>
-        <label class="block text-xs font-medium text-zinc-500 mb-2">Couleur hex</label>
+        <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-3">Couleur hex</label>
         <div class="flex gap-2">
-          {{ form.color(id='tag-color', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors') }}
-          <input type="color" id="color-picker" value="{{ tag.color if tag else '#6366f1' }}"
-                 class="w-12 h-12 rounded-xl border border-zinc-700 bg-zinc-800 cursor-pointer flex-shrink-0" />
+          {{ form.color(id='tag-color', class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-accent transition-all') }}
+          <div class="relative w-12 h-11 flex-shrink-0">
+            <input type="color" id="color-picker" value="{{ tag.color if tag else '#6366f1' }}"
+                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+            <div id="color-preview" class="w-full h-full rounded-xl border border-border shadow-sm" style="background-color: {{ tag.color if tag else '#6366f1' }}"></div>
+          </div>
         </div>
       </div>
       <div>
-        <label class="block text-xs font-medium text-zinc-500 mb-2">Slug</label>
-        {{ form.slug(id='tag-slug', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors') }}
+        <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-3">Slug</label>
+        {{ form.slug(id='tag-slug', class='w-full bg-subtle border border-border text-muted rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-accent transition-all') }}
       </div>
       <div class="flex gap-3 pt-2">
-        <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl text-sm transition-colors">Enregistrer</button>
-        <a href="{{ url_for('admin_bp.tags_list') }}" class="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm transition-colors">Annuler</a>
+        <button type="submit" class="flex-1 bg-accent text-white font-black py-4 rounded-2xl text-xs uppercase tracking-widest hover:scale-[1.02] transition-all shadow-lg shadow-accent/20">Enregistrer</button>
+        <a href="{{ url_for('admin_bp.tags_list') }}" class="px-8 py-4 bg-subtle text-muted font-bold rounded-2xl text-xs uppercase tracking-widest hover:bg-border transition-all">Annuler</a>
       </div>
     </form>
   </div>
@@ -39,7 +46,8 @@
 <script>
 const cp = document.getElementById('color-picker');
 const ci = document.getElementById('tag-color');
-cp.addEventListener('input', () => ci.value = cp.value);
-ci.addEventListener('input', () => cp.value = ci.value);
+const preview = document.getElementById('color-preview');
+cp.addEventListener('input', () => { ci.value = cp.value; preview.style.backgroundColor = cp.value; });
+ci.addEventListener('input', () => { if(/^#[0-9A-F]{6}$/i.test(ci.value)) { cp.value = ci.value; preview.style.backgroundColor = ci.value; } });
 </script>
 {% endblock %}

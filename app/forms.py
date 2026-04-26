@@ -52,3 +52,10 @@ class CategoryForm(FlaskForm):
     slug = StringField("Slug (auto-généré si vide)", validators=[Optional(), Length(max=100)])
     description = TextAreaField("Description", validators=[Optional()])
     submit = SubmitField("Enregistrer")
+
+
+class CommentForm(FlaskForm):
+    author_name = StringField("Nom", validators=[DataRequired(), Length(max=100)])
+    author_email = StringField("Email", validators=[Optional(), Email(), Length(max=120)])
+    content = TextAreaField("Message", validators=[DataRequired(), Length(min=2)])
+    submit = SubmitField("Envoyer")

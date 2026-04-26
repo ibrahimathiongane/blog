@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block page_title %}Recherche : {{ query }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+  <div class="mb-12 animate-fade-in">
+    <h1 class="text-xs font-black text-muted uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+      <span class="w-8 h-px bg-border"></span>
+      Résultats de recherche
+    </h1>
+    <h2 class="text-3xl md:text-4xl font-black text-DEFAULT tracking-tight">
+      Articles contenant <span class="text-accent">"{{ query }}"</span>
+    </h2>
+  </div>
+
+  {% if articles.items %}
+  <div class="space-y-8 animate-slide-up">
+    {% for article in articles.items %}
+    <article class="group relative bg-surface border border-border rounded-[2.5rem] p-8 hover:shadow-2xl hover:shadow-accent/5 transition-all duration-500">
+      <div class="flex flex-col md:flex-row gap-8">
+        {% if article.image_url %}
+        <div class="w-full md:w-48 h-32 rounded-2xl overflow-hidden flex-shrink-0 bg-subtle">
+          <img src="{{ article.image_url }}" alt="{{ article.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        </div>
+        {% endif %}
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-3">
+            <span class="text-[10px] font-black text-accent uppercase tracking-widest">{{ article.category.name if article.category else 'Tech' }}</span>
+            <span class="text-[10px] text-muted opacity-40 uppercase font-bold tracking-widest">{{ article.published_at.strftime('%d %b %Y') }}</span>
+          </div>
+          <h3 class="text-xl font-black text-DEFAULT group-hover:text-accent transition-colors mb-3">
+            <a href="{{ url_for('main.article', slug=article.slug) }}">{{ article.title }}</a>
+          </h3>
+          <p class="text-sm text-muted leading-relaxed opacity-80 line-clamp-2">
+            {{ article.summary or article.content[:150] | striptags }}...
+          </p>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+
+    {# Pagination #}
+    {% if articles.pages > 1 %}
+    <div class="pt-10 flex justify-center gap-2">
+      {% if articles.has_prev %}
+      <a href="{{ url_for('main.search', q=query, page=articles.prev_num) }}"
+         class="w-12 h-12 rounded-2xl border border-border flex items-center justify-center text-muted hover:border-accent hover:text-accent transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+      </a>
+      {% endif %}
+      {% if articles.has_next %}
+      <a href="{{ url_for('main.search', q=query, page=articles.next_num) }}"
+         class="w-12 h-12 rounded-2xl border border-border flex items-center justify-center text-muted hover:border-accent hover:text-accent transition-all">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="text-center py-24 bg-subtle/30 border border-dashed border-border rounded-[2.5rem] animate-fade-in">
+    <div class="text-5xl mb-6 opacity-20">🔍</div>
+    <p class="text-lg font-bold text-muted mb-2">Aucun article trouvé pour "{{ query }}"</p>
+    <p class="text-sm text-muted opacity-60">Essayez avec d'autres mots-clés ou parcourez les catégories.</p>
+    <a href="{{ url_for('main.index') }}" class="inline-block mt-8 text-xs font-black text-accent uppercase tracking-widest hover:opacity-80 transition-opacity">Retour à l'accueil →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

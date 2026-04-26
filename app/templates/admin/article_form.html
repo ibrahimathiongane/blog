@@ -3,48 +3,50 @@
 
 {% block extra_head %}
 <style>
-.editor-pane { resize: none; min-height: 500px; }
+.editor-pane { resize: none; min-height: 600px; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="flex items-center gap-4 mb-6">
-  <a href="{{ url_for('admin_bp.articles') }}" class="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">← Articles</a>
-  <span class="text-zinc-700">/</span>
-  <span class="text-sm text-zinc-400">{{ action }} un article</span>
+<div class="flex items-center gap-4 mb-8">
+  <a href="{{ url_for('admin_bp.articles') }}" class="w-8 h-8 rounded-lg bg-subtle flex items-center justify-center text-muted hover:text-accent transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+  </a>
+  <div class="h-4 w-px bg-border"></div>
+  <p class="text-xs font-black uppercase tracking-widest text-muted">{{ action }} un article</p>
 </div>
 
 <form method="POST" novalidate>
   {{ form.hidden_tag() }}
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
     {# ── Left: main editor ── #}
-    <div class="xl:col-span-2 space-y-5">
+    <div class="xl:col-span-2 space-y-8">
       {# Title #}
-      <div>
-        <label class="block text-sm font-medium text-zinc-400 mb-2">Titre *</label>
-        {{ form.title(id='article-title', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors', placeholder='Titre de l\'article') }}
-        {% if form.title.errors %}<p class="text-red-400 text-xs mt-1">{{ form.title.errors[0] }}</p>{% endif %}
+      <div class="bg-surface border border-border rounded-[2rem] p-8 shadow-sm">
+        <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-4">Titre de l'article *</label>
+        {{ form.title(id='article-title', class='w-full bg-subtle border border-border text-DEFAULT rounded-2xl px-5 py-4 text-lg font-black focus:outline-none focus:border-accent transition-all placeholder:text-muted/30', placeholder='Comment bâtir une API robuste...') }}
+        {% if form.title.errors %}<p class="text-red-500 text-xs font-bold mt-2 ml-1">{{ form.title.errors[0] }}</p>{% endif %}
       </div>
 
       {# Summary #}
-      <div>
-        <label class="block text-sm font-medium text-zinc-400 mb-2">Résumé</label>
-        {{ form.summary(id='article-summary', rows=3, class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors resize-none', placeholder='Courte description affichée dans la liste…') }}
-        {% if form.summary.errors %}<p class="text-red-400 text-xs mt-1">{{ form.summary.errors[0] }}</p>{% endif %}
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm">
+        <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-4">Résumé court</label>
+        {{ form.summary(id='article-summary', rows=3, class='w-full bg-subtle border border-border text-DEFAULT rounded-2xl px-5 py-4 text-sm leading-relaxed focus:outline-none focus:border-accent transition-all resize-none placeholder:text-muted/30', placeholder='Une courte introduction qui apparaîtra sur la page d\'accueil...') }}
+        {% if form.summary.errors %}<p class="text-red-500 text-xs font-bold mt-2 ml-1">{{ form.summary.errors[0] }}</p>{% endif %}
       </div>
 
       {# Markdown editor + preview tabs #}
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <label class="block text-sm font-medium text-zinc-400">Contenu (Markdown) *</label>
-          <div class="flex gap-1 bg-zinc-800 rounded-lg p-0.5">
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <label class="block text-[10px] font-black text-muted uppercase tracking-widest">Contenu Markdown *</label>
+          <div class="flex gap-1 bg-subtle rounded-xl p-1">
             <button type="button" id="tab-editor"
-                    class="px-3 py-1 rounded-md text-xs font-medium text-white bg-zinc-700 transition-colors">
+                    class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all bg-accent text-white shadow-lg shadow-accent/20">
               Éditeur
             </button>
             <button type="button" id="tab-preview"
-                    class="px-3 py-1 rounded-md text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors">
+                    class="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-muted hover:text-accent transition-all">
               Aperçu
             </button>
           </div>
@@ -52,85 +54,94 @@
 
         {# Editor #}
         <div id="editor-pane">
-          {{ form.content(id='article-content', class='editor-pane w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors', placeholder='# Mon article\n\nÉcris ton contenu en Markdown ici…') }}
-          {% if form.content.errors %}<p class="text-red-400 text-xs mt-1">{{ form.content.errors[0] }}</p>{% endif %}
+          {{ form.content(id='article-content', class='editor-pane w-full bg-subtle border border-border text-DEFAULT rounded-2xl px-6 py-5 text-sm font-mono focus:outline-none focus:border-accent transition-all placeholder:text-muted/20', placeholder='# Introduction\n\nLe contenu de votre article ici...') }}
+          {% if form.content.errors %}<p class="text-red-500 text-xs font-bold mt-2 ml-1">{{ form.content.errors[0] }}</p>{% endif %}
         </div>
 
         {# Preview #}
-        <div id="preview-pane" class="hidden bg-zinc-900 border border-zinc-700 rounded-xl px-6 py-5 min-h-[500px]">
-          <div id="preview-content" class="prose-article text-sm text-zinc-400 italic">
-            Clique sur "Aperçu" pour voir le rendu…
+        <div id="preview-pane" class="hidden bg-subtle border border-border rounded-2xl px-8 py-8 min-h-[600px] overflow-y-auto">
+          <div id="preview-content" class="prose-article">
+            <p class="text-muted italic opacity-40">Génération du rendu...</p>
           </div>
         </div>
       </div>
     </div>
 
     {# ── Right: metadata sidebar ── #}
-    <div class="space-y-5">
+    <div class="space-y-8">
 
       {# Publish box #}
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-        <h3 class="text-sm font-semibold text-zinc-300 mb-4">Publication</h3>
-        <label class="flex items-center gap-3 cursor-pointer mb-4">
-          {{ form.is_published(id='is-published', class='w-4 h-4 rounded accent-brand-500') }}
-          <span class="text-sm text-zinc-300">Publier maintenant</span>
+      <div class="bg-gradient-to-br from-accent to-violet-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-accent/20">
+        <h3 class="text-xs font-black uppercase tracking-widest mb-6 opacity-80">Publication</h3>
+        <label class="flex items-center gap-4 cursor-pointer mb-8 group">
+          <div class="relative">
+            {{ form.is_published(id='is-published', class='sr-only') }}
+            <div class="w-10 h-5 bg-white/20 rounded-full transition-colors group-hover:bg-white/30"></div>
+            <div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform"></div>
+          </div>
+          <span class="text-sm font-bold">Publier l'article</span>
         </label>
         <button type="submit" id="save-article-btn"
-                class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+                class="w-full bg-white text-accent font-black py-4 rounded-2xl text-sm uppercase tracking-widest hover:bg-zinc-100 transition-all shadow-lg active:scale-[0.98]">
           {{ action }}
         </button>
       </div>
 
       {# Taxonomy #}
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-        <h3 class="text-sm font-semibold text-zinc-300 mb-4">Classification</h3>
-        <div class="mb-4">
-          <label class="block text-xs font-medium text-zinc-500 mb-2">Catégorie</label>
-          {{ form.category_id(id='category-id', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition-colors') }}
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm">
+        <h3 class="text-[10px] font-black text-muted uppercase tracking-widest mb-6">Classification</h3>
+        <div class="mb-6">
+          <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Catégorie</label>
+          {{ form.category_id(id='category-id', class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-accent transition-all appearance-none cursor-pointer') }}
         </div>
         <div>
-          <label class="block text-xs font-medium text-zinc-500 mb-2">Tags</label>
-          {{ form.tags(id='article-tags', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='python, flask, backend') }}
-          <p class="text-xs text-zinc-600 mt-1">Séparés par des virgules</p>
-        </div>
-      </div>
-
-      {# Image #}
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-        <h3 class="text-sm font-semibold text-zinc-300 mb-4">Image de couverture</h3>
-        {{ form.cover_image(id='cover-image', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='https://…') }}
-      </div>
-
-      {# Slug #}
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-        <h3 class="text-sm font-semibold text-zinc-300 mb-4">URL</h3>
-        <div>
-          <label class="block text-xs font-medium text-zinc-500 mb-2">Slug</label>
-          {{ form.slug(id='article-slug', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors', placeholder='auto-généré') }}
-          <p class="text-xs text-zinc-600 mt-1">Laisser vide pour auto-génération</p>
+          <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Tags</label>
+          {{ form.tags(id='article-tags', class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-accent transition-all placeholder:text-muted/30', placeholder='python, tutorial, api') }}
+          <p class="text-[10px] text-muted mt-2 opacity-50">Séparés par des virgules</p>
         </div>
       </div>
 
       {# SEO #}
-      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-        <h3 class="text-sm font-semibold text-zinc-300 mb-4">SEO</h3>
-        <div class="mb-3">
-          <label class="block text-xs font-medium text-zinc-500 mb-2">Meta Title</label>
-          {{ form.meta_title(id='meta-title', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='Titre SEO (facultatif)') }}
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm">
+        <h3 class="text-[10px] font-black text-muted uppercase tracking-widest mb-6">Optimisation SEO</h3>
+        <div class="mb-4">
+          <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Titre SEO</label>
+          {{ form.meta_title(id='meta-title', class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-accent transition-all') }}
         </div>
         <div>
-          <label class="block text-xs font-medium text-zinc-500 mb-2">Meta Description</label>
-          {{ form.meta_description(id='meta-description', rows=3, class='w-full bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brand-500 transition-colors resize-none', placeholder='Description SEO (facultatif)') }}
+          <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Meta Description</label>
+          {{ form.meta_description(id='meta-description', rows=3, class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-accent transition-all resize-none') }}
+        </div>
+      </div>
+      
+      {# Advanced #}
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm opacity-60 hover:opacity-100 transition-opacity">
+        <h3 class="text-[10px] font-black text-muted uppercase tracking-widest mb-6">Paramètres avancés</h3>
+        <div class="mb-4">
+          <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Slug personnalisé</label>
+          {{ form.slug(id='article-slug', class='w-full bg-subtle border border-border text-muted rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-accent transition-all') }}
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Image URL</label>
+          {{ form.cover_image(id='cover-image', class='w-full bg-subtle border border-border text-muted rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-accent transition-all') }}
         </div>
       </div>
     </div>
   </div>
 </form>
+
+<style>
+#is-published:checked + div + .dot {
+  transform: translateX(20px);
+}
+#is-published:checked + div {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+</style>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-// Tab editor / preview
 const tabEditor = document.getElementById('tab-editor');
 const tabPreview = document.getElementById('tab-preview');
 const editorPane = document.getElementById('editor-pane');
@@ -141,19 +152,21 @@ const contentArea = document.getElementById('article-content');
 tabEditor.addEventListener('click', () => {
   editorPane.classList.remove('hidden');
   previewPane.classList.add('hidden');
-  tabEditor.classList.add('text-white', 'bg-zinc-700');
-  tabPreview.classList.remove('text-white', 'bg-zinc-700');
-  tabPreview.classList.add('text-zinc-400');
+  tabEditor.classList.add('bg-accent', 'text-white', 'shadow-lg', 'shadow-accent/20');
+  tabEditor.classList.remove('text-muted');
+  tabPreview.classList.remove('bg-accent', 'text-white', 'shadow-lg', 'shadow-accent/20');
+  tabPreview.classList.add('text-muted');
 });
 
 tabPreview.addEventListener('click', async () => {
   previewPane.classList.remove('hidden');
   editorPane.classList.add('hidden');
-  tabPreview.classList.add('text-white', 'bg-zinc-700');
-  tabEditor.classList.remove('text-white', 'bg-zinc-700');
-  tabEditor.classList.add('text-zinc-400');
+  tabPreview.classList.add('bg-accent', 'text-white', 'shadow-lg', 'shadow-accent/20');
+  tabPreview.classList.remove('text-muted');
+  tabEditor.classList.remove('bg-accent', 'text-white', 'shadow-lg', 'shadow-accent/20');
+  tabEditor.classList.add('text-muted');
 
-  previewContent.innerHTML = '<p class="text-zinc-500 italic">Chargement…</p>';
+  previewContent.innerHTML = '<p class="text-muted animate-pulse">Conversion du Markdown...</p>';
   try {
     const res = await fetch('{{ url_for("admin_bp.preview") }}', {
       method: 'POST',
@@ -163,7 +176,7 @@ tabPreview.addEventListener('click', async () => {
     const data = await res.json();
     previewContent.innerHTML = data.html;
   } catch(e) {
-    previewContent.innerHTML = '<p class="text-red-400">Erreur de chargement.</p>';
+    previewContent.innerHTML = '<p class="text-red-500 font-bold">Erreur lors du rendu.</p>';
   }
 });
 </script>

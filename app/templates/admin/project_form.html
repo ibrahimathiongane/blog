@@ -2,74 +2,102 @@
 {% block page_title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="flex items-center gap-4 mb-6">
-  <a href="{{ url_for('admin_bp.projects_list') }}" class="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">← Projets</a>
+<div class="flex items-center gap-4 mb-8">
+  <a href="{{ url_for('admin_bp.projects_list') }}" class="w-8 h-8 rounded-lg bg-subtle flex items-center justify-center text-muted hover:text-accent transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+  </a>
+  <div class="h-4 w-px bg-border"></div>
+  <p class="text-xs font-black uppercase tracking-widest text-muted">{{ action }} un projet</p>
 </div>
 
-<div class="max-w-2xl">
-  <form method="POST" novalidate class="space-y-5">
+<div class="max-w-4xl">
+  <form method="POST" novalidate class="grid grid-cols-1 md:grid-cols-3 gap-8">
     {{ form.hidden_tag() }}
 
-    <div>
-      <label class="block text-sm font-medium text-zinc-400 mb-2">Titre *</label>
-      {{ form.title(id='project-title', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors') }}
-      {% if form.title.errors %}<p class="text-red-400 text-xs mt-1">{{ form.title.errors[0] }}</p>{% endif %}
-    </div>
-
-    <div>
-      <label class="block text-sm font-medium text-zinc-400 mb-2">Description *</label>
-      {{ form.description(id='project-desc', rows=5, class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors resize-none') }}
-      {% if form.description.errors %}<p class="text-red-400 text-xs mt-1">{{ form.description.errors[0] }}</p>{% endif %}
-    </div>
-
-    <div>
-      <label class="block text-sm font-medium text-zinc-400 mb-2">Stack technique</label>
-      {{ form.tech_stack(id='tech-stack', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='Python, Flask, PostgreSQL, Docker') }}
-      <p class="text-xs text-zinc-600 mt-1">Séparées par des virgules</p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium text-zinc-400 mb-2">GitHub URL</label>
-        {{ form.github_url(id='github-url', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='https://github.com/…') }}
+    <div class="md:col-span-2 space-y-8">
+      {# Main info #}
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm">
+        <div class="space-y-6">
+          <div>
+            <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-3">Titre du projet *</label>
+            {{ form.title(id='project-title', class='w-full bg-subtle border border-border text-DEFAULT rounded-2xl px-5 py-4 text-lg font-black focus:outline-none focus:border-accent transition-all placeholder:text-muted/30', placeholder='Portfolio v2...') }}
+            {% if form.title.errors %}<p class="text-red-500 text-xs font-bold mt-2">{{ form.title.errors[0] }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-3">Description *</label>
+            {{ form.description(id='project-desc', rows=5, class='w-full bg-subtle border border-border text-DEFAULT rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-accent transition-all resize-none placeholder:text-muted/30', placeholder='Une application web performante bâtie avec...') }}
+            {% if form.description.errors %}<p class="text-red-500 text-xs font-bold mt-2">{{ form.description.errors[0] }}</p>{% endif %}
+          </div>
+          <div>
+            <label class="block text-[10px] font-black text-muted uppercase tracking-widest mb-3">Stack technique</label>
+            {{ form.tech_stack(id='tech-stack', class='w-full bg-subtle border border-border text-DEFAULT rounded-2xl px-5 py-3 text-sm font-bold focus:outline-none focus:border-accent transition-all', placeholder='Python, Flask, TailwindCSS...') }}
+            <p class="text-[10px] text-muted mt-2 opacity-50 italic">Séparées par des virgules</p>
+          </div>
+        </div>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-zinc-400 mb-2">Demo URL</label>
-        {{ form.demo_url(id='demo-url', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='https://…') }}
-      </div>
-    </div>
 
-    <div>
-      <label class="block text-sm font-medium text-zinc-400 mb-2">Image URL</label>
-      {{ form.image_url(id='image-url', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='https://…') }}
-    </div>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="block text-sm font-medium text-zinc-400 mb-2">Ordre</label>
-        {{ form.order(id='project-order', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors', placeholder='0') }}
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-zinc-400 mb-2">Slug</label>
-        {{ form.slug(id='project-slug', class='w-full bg-zinc-900 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors', placeholder='auto-généré') }}
+      {# Links #}
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm">
+        <h3 class="text-[10px] font-black text-muted uppercase tracking-widest mb-6">Liens & Ressources</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">GitHub URL</label>
+            {{ form.github_url(id='github-url', class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-accent transition-all', placeholder='https://github.com/...') }}
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Demo URL</label>
+            {{ form.demo_url(id='demo-url', class='w-full bg-subtle border border-border text-DEFAULT rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-accent transition-all', placeholder='https://...') }}
+          </div>
+        </div>
       </div>
     </div>
 
-    <label class="flex items-center gap-3 cursor-pointer">
-      {{ form.is_featured(id='is-featured', class='w-4 h-4 rounded accent-brand-500') }}
-      <span class="text-sm text-zinc-300">Projet mis en avant</span>
-    </label>
+    <div class="space-y-8">
+      {# Publish box #}
+      <div class="bg-gradient-to-br from-accent to-violet-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-accent/20">
+        <h3 class="text-xs font-black uppercase tracking-widest mb-6 opacity-80">Statut</h3>
+        <label class="flex items-center gap-4 cursor-pointer mb-8 group">
+          <div class="relative">
+            {{ form.is_featured(id='is-featured', class='sr-only') }}
+            <div class="w-10 h-5 bg-white/20 rounded-full transition-colors group-hover:bg-white/30"></div>
+            <div class="dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform"></div>
+          </div>
+          <span class="text-sm font-bold">Mettre en avant</span>
+        </label>
+        <button type="submit" id="save-project-btn"
+                class="w-full bg-white text-accent font-black py-4 rounded-2xl text-sm uppercase tracking-widest hover:bg-zinc-100 transition-all shadow-lg active:scale-[0.98]">
+          {{ action }}
+        </button>
+      </div>
 
-    <div class="flex gap-3 pt-2">
-      <button type="submit" id="save-project-btn"
-              class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl text-sm transition-colors">
-        {{ action }}
-      </button>
-      <a href="{{ url_for('admin_bp.projects_list') }}"
-         class="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm transition-colors">
-        Annuler
-      </a>
+      {# Advanced #}
+      <div class="bg-surface border border-border rounded-[2.5rem] p-8 shadow-sm">
+        <h3 class="text-[10px] font-black text-muted uppercase tracking-widest mb-6">Configuration</h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Slug</label>
+            {{ form.slug(id='project-slug', class='w-full bg-subtle border border-border text-muted rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:border-accent transition-all') }}
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Image URL</label>
+            {{ form.image_url(id='image-url', class='w-full bg-subtle border border-border text-muted rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-accent transition-all') }}
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-muted uppercase tracking-widest mb-3 opacity-60">Ordre d'affichage</label>
+            {{ form.order(id='project-order', class='w-full bg-subtle border border-border text-muted rounded-xl px-4 py-3 text-xs font-bold focus:outline-none focus:border-accent transition-all') }}
+          </div>
+        </div>
+      </div>
     </div>
   </form>
 </div>
+
+<style>
+#is-featured:checked + div + .dot {
+  transform: translateX(20px);
+}
+#is-featured:checked + div {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+</style>
 {% endblock %}

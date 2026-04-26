@@ -4,8 +4,9 @@ from flask import (
     request, current_app, make_response,
 )
 from app import db, cache
-from app.models import Article, Tag, Category, Project
+from app.models import Article, Tag, Category, Project, Comment
 from app.utils import render_markdown, build_rss_item
+from app.forms import CommentForm
 
 main_bp = Blueprint("main", __name__)
 
@@ -42,8 +43,35 @@ def article(slug):
     # Increment views (not cached)
     art.views += 1
     db.session.commit()
+    
+    form = CommentForm()
     html_content = render_markdown(art.content)
-    return render_template("article.html", article=art, content=html_content)
+    
+    # Comments are ordered by created_at desc in the relationship
+    return render_template("article.html", article=art, content=html_content, form=form)
+
+
+@main_bp.route("/blog/<slug>/comment", methods=["POST"])
+def comment(slug):
+    art = Article.query.filter_by(slug=slug, is_published=True).first_or_404()
+    form = CommentForm()
+    if form.validate_on_submit():
+        new_comment = Comment(
+            author_name=form.author_name.data,
+            author_email=form.author_email.data,
+            content=form.content.data,
+            article_id=art.id
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        # Add a flash message
+        from flask import flash
+        flash("Merci ! Votre commentaire a été publié.", "success")
+    else:
+        from flask import flash
+        flash("Erreur lors de l'envoi du commentaire. Veuillez vérifier les champs.", "danger")
+        
+    return redirect(url_for("main.article", slug=slug))
 
 
 @main_bp.route("/projets")
@@ -90,6 +118,34 @@ def tag(slug):
         tag=t,
         articles=articles,
         title=f"Tag : {t.name}",
+    )
+
+
+@main_bp.route("/search")
+def search():
+    query = request.args.get("q", "").strip()
+    if not query:
+        return redirect(url_for("main.index"))
+    
+    page = request.args.get("page", 1, type=int)
+    # Simple search with LIKE for compatibility
+    articles = (
+        _published_articles()
+        .filter(
+            db.or_(
+                Article.title.ilike(f"%{query}%"),
+                Article.summary.ilike(f"%{query}%"),
+                Article.content.ilike(f"%{query}%")
+            )
+        )
+        .paginate(page=page, per_page=ARTICLES_PER_PAGE, error_out=False)
+    )
+    
+    return render_template(
+        "search.html",
+        articles=articles,
+        query=query,
+        title=f"Résultats pour '{query}'"
     )
 
 

@@ -107,6 +107,22 @@ class User(UserMixin, db.Model):
         return f"<User {self.username}>"
 
 
+class Comment(db.Model):
+    __tablename__ = "comment"
+    id = db.Column(db.Integer, primary_key=True)
+    author_name = db.Column(db.String(100), nullable=False)
+    author_email = db.Column(db.String(120), nullable=True)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    is_approved = db.Column(db.Boolean, default=True)
+
+    article_id = db.Column(db.Integer, db.ForeignKey("article.id"), nullable=False)
+    article = db.relationship("Article", back_populates="comments")
+
+
+Article.comments = db.relationship("Comment", back_populates="article", cascade="all, delete-orphan", order_by="Comment.created_at.desc()")
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))

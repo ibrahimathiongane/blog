@@ -6,7 +6,7 @@ from flask import (
 )
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, bcrypt, limiter, cache
-from app.models import Article, Tag, Category, Project, User
+from app.models import Article, Tag, Category, Project, User, Comment
 from app.forms import LoginForm, ArticleForm, ProjectForm, TagForm, CategoryForm
 from app.utils import make_slug, estimate_read_time, render_markdown
 
@@ -57,6 +57,7 @@ def dashboard():
         "projects_total": Project.query.count(),
         "tags_total": Tag.query.count(),
         "categories_total": Category.query.count(),
+        "comments_total": Comment.query.count(),
         "total_views": db.session.query(db.func.sum(Article.views)).scalar() or 0,
     }
     recent_articles = Article.query.order_by(Article.created_at.desc()).limit(5).all()
@@ -310,3 +311,23 @@ def category_delete(id):
     db.session.commit()
     flash(f'Catégorie "{cat.name}" supprimée.', "warning")
     return redirect(url_for("admin_bp.categories_list"))
+
+
+# ── Comments ──────────────────────────────────────────────────────────────────
+
+@admin_bp.route("/comments")
+@login_required
+def comments_list():
+    page = request.args.get("page", 1, type=int)
+    coms = Comment.query.order_by(Comment.created_at.desc()).paginate(page=page, per_page=20, error_out=False)
+    return render_template("admin/comments.html", comments=coms, title="Commentaires")
+
+
+@admin_bp.route("/comments/<int:id>/delete", methods=["POST"])
+@login_required
+def comment_delete(id):
+    com = db.session.get(Comment, id) or abort(404)
+    db.session.delete(com)
+    db.session.commit()
+    flash("Commentaire supprimé.", "warning")
+    return redirect(url_for("admin_bp.comments_list"))

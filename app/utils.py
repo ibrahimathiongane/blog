@@ -73,9 +73,12 @@ def build_rss_item(article, base_url: str) -> dict:
     return {
         "title": article.title,
         "link": f"{base_url}/blog/{article.slug}",
-        "description": article.summary,
+        "description": article.summary or "",
+        "content": render_markdown(article.content),
         "pubDate": article.published_at.strftime("%a, %d %b %Y %H:%M:%S +0000")
         if article.published_at
         else "",
         "guid": f"{base_url}/blog/{article.slug}",
+        "image": article.image_url if hasattr(article, 'image_url') and article.image_url else None,
+        "author": article.author.username if hasattr(article, 'author') and article.author else "Admin"
     }

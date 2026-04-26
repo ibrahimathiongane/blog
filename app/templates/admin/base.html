@@ -2,17 +2,66 @@
 <html lang="fr">
 <head>
   <script>
-    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    function applyTheme() {
+      const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
+    applyTheme();
   </script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-surface: #fafafa;
+      --bg-subtle: #f4f4f5;
+      --text: #09090b;
+      --text-muted: #71717a;
+      --accent: #6366f1;
+      --accent-bg: #eef2ff;
+      --border: #e4e4e7;
+    }
+
+    [data-theme="dark"] {
+      --bg: #09090b;
+      --bg-surface: #121214;
+      --bg-subtle: #18181b;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --accent: #818cf8;
+      --accent-bg: #1e1b4b;
+      --border: #27272a;
+    }
+
+    body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+    .glass {
+      background: rgba(var(--bg-rgb, 255, 255, 255), 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dark .glass {
+      background: rgba(9, 9, 11, 0.7);
+    }
+
+    /* Sidebar transition */
+    #admin-sidebar {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @media (max-width: 1024px) {
+      #admin-sidebar.closed {
+        transform: translateX(-100%);
+      }
+    }
+  </style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block page_title %}Admin{% endblock %} — {{ blog_title }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -24,7 +73,18 @@
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
+            zinc: { 950: '#09090b' },
             brand: { 400:'#818cf8', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca', 900:'#312e81' },
+            bg: 'var(--bg)',
+            surface: 'var(--bg-surface)',
+            subtle: 'var(--bg-subtle)',
+            muted: 'var(--text-muted)',
+            accent: 'var(--accent)',
+            'accent-bg': 'var(--accent-bg)',
+            border: 'var(--border)',
+          },
+          textColor: {
+            DEFAULT: 'var(--text)',
           },
         },
       },
@@ -33,57 +93,64 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
   {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased transition-colors duration-300">
+<body class="bg-bg text-DEFAULT font-sans antialiased transition-colors duration-300">
 
-<div class="flex h-screen overflow-hidden">
+<div class="flex h-screen overflow-hidden relative">
+
+  {# ── Sidebar Overlay (Mobile) ── #}
+  <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
 
   {# ── Sidebar ── #}
-  <aside class="w-60 flex-shrink-0 bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
-    <div class="h-16 flex items-center px-5 border-b border-zinc-200 dark:border-zinc-800">
+  <aside id="admin-sidebar" class="fixed lg:static inset-y-0 left-0 w-64 lg:w-72 flex-shrink-0 bg-surface border-r border-border flex flex-col z-40 closed lg:transform-none">
+    <div class="h-16 flex items-center justify-between px-6 border-b border-border">
       <a href="{{ url_for('main.index') }}" class="flex items-center gap-2 group">
-        <span class="w-7 h-7 rounded-md bg-brand-600 flex items-center justify-center text-white font-bold text-xs">
+        <span class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm group-hover:scale-110 group-hover:rotate-3 transition-transform">
           {{ blog_author[0] | upper }}
         </span>
-        <span class="font-semibold text-sm text-zinc-200">Admin</span>
+        <span class="font-black text-sm tracking-tight opacity-90 uppercase">Admin</span>
       </a>
+      <button id="close-sidebar" class="lg:hidden p-2 text-muted hover:text-accent">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
     </div>
 
-    <nav class="flex-1 px-3 py-4 overflow-y-auto">
+    <nav class="flex-1 px-4 py-8 overflow-y-auto space-y-1.5">
       {% set nav_items = [
         ('admin_bp.dashboard', 'Dashboard', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'),
         ('admin_bp.articles', 'Articles', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'),
         ('admin_bp.projects_list', 'Projets', 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'),
         ('admin_bp.tags_list', 'Tags', 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'),
         ('admin_bp.categories_list', 'Catégories', 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'),
+        ('admin_bp.comments_list', 'Commentaires', 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z'),
       ] %}
       {% for endpoint, label, icon_path in nav_items %}
       <a href="{{ url_for(endpoint) }}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-1 transition-all
+         class="flex items-center gap-3.5 px-5 py-3 rounded-2xl text-sm font-bold transition-all
                 {% if request.endpoint == endpoint %}
-                  bg-brand-600/10 dark:bg-brand-600/20 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800/50
+                  bg-accent text-white shadow-lg shadow-accent/20 border border-accent
                 {% else %}
-                  text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800
+                  text-muted hover:text-accent hover:bg-subtle border border-transparent
                 {% endif %}">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ icon_path }}"/>
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="{{ icon_path }}"/>
         </svg>
         {{ label }}
       </a>
       {% endfor %}
     </nav>
 
-    <div class="p-3 border-t border-zinc-200 dark:border-zinc-800">
+    <div class="p-4 mt-auto border-t border-border space-y-1">
       <a href="{{ url_for('main.index') }}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all mb-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+         class="flex items-center gap-3.5 px-5 py-3 rounded-2xl text-sm font-bold text-muted hover:text-accent hover:bg-subtle transition-all border border-transparent">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
         </svg>
         Voir le blog
       </a>
       <a href="{{ url_for('admin_bp.logout') }}"
-         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-500 hover:text-red-400 hover:bg-red-900/20 transition-all">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+         class="flex items-center gap-3.5 px-5 py-3 rounded-2xl text-sm font-bold text-muted hover:text-red-500 hover:bg-red-500/10 transition-all border border-transparent">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
         </svg>
         Déconnexion
@@ -92,21 +159,29 @@
   </aside>
 
   {# ── Main area ── #}
-  <div class="flex-1 flex flex-col overflow-hidden">
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
     {# Top bar #}
-    <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-200 dark:border-zinc-800 bg-white/60 dark:bg-zinc-950/60 backdrop-blur-sm flex-shrink-0">
-      <h1 class="text-base font-semibold text-zinc-800 dark:text-zinc-200">{% block header_title %}{{ title }}{% endblock %}</h1>
-      <div class="flex items-center gap-4">
-        
-        <button id="theme-toggle" class="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all" aria-label="Toggle Theme">
-          <svg class="sun-icon hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
-          <svg class="moon-icon hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
+    <header class="h-16 flex items-center justify-between px-4 lg:px-8 border-b border-border glass z-20 flex-shrink-0">
+      <div class="flex items-center gap-3 min-w-0">
+        <button id="open-sidebar" class="lg:hidden p-2 -ml-2 text-muted hover:text-accent flex-shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <h1 class="text-[10px] font-black uppercase tracking-[0.2em] text-muted truncate hidden sm:block">{% block header_title %}{{ title }}{% endblock %}</h1>
+      </div>
+
+      <div class="flex items-center gap-3 lg:gap-6 flex-shrink-0">
+        <button id="theme-toggle" class="p-2 rounded-xl bg-subtle text-muted hover:text-accent hover:bg-accent/10 transition-all" aria-label="Toggle Theme">
+          <svg class="sun-icon hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
+          <svg class="moon-icon hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
         </button>
 
-        <div class="flex items-center gap-3">
-          <span class="text-xs text-zinc-500">Connecté</span>
-          <div class="w-7 h-7 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
-            {{ blog_author[0] | upper }}
+        <div class="flex items-center gap-3 pl-3 lg:pl-6 border-l border-border">
+          <div class="text-right hidden md:block">
+            <p class="text-[10px] font-black text-DEFAULT leading-none mb-1 truncate max-w-[100px]">{{ blog_author }}</p>
+            <p class="text-[8px] text-emerald-500 font-black uppercase tracking-widest leading-none">Online</p>
+          </div>
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-violet-600 flex items-center justify-center text-white text-[10px] font-black shadow-lg shadow-brand-500/20 flex-shrink-0">
+            {{ blog_author[0] | upper if blog_author else 'A' }}
           </div>
         </div>
       </div>
@@ -115,13 +190,14 @@
     {# Flash messages #}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-      <div class="px-6 pt-4">
+      <div class="px-6 lg:px-10 pt-6">
         {% for category, message in messages %}
-          {% set colors = {'success': 'bg-emerald-900/50 border-emerald-700 text-emerald-300',
-                           'danger':  'bg-red-900/50 border-red-700 text-red-300',
-                           'warning': 'bg-amber-900/50 border-amber-700 text-amber-300',
-                           'info':    'bg-blue-900/50 border-blue-700 text-blue-300'} %}
-          <div class="mb-2 px-4 py-3 rounded-xl border text-sm {{ colors.get(category, 'bg-zinc-800 border-zinc-700 text-zinc-300') }}">
+          {% set colors = {'success': 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500',
+                           'danger':  'bg-red-500/10 border-red-500/20 text-red-500',
+                           'warning': 'bg-amber-500/10 border-amber-500/20 text-amber-500',
+                           'info':    'bg-blue-500/10 border-blue-500/20 text-blue-500'} %}
+          <div class="mb-4 px-5 py-4 rounded-3xl border text-xs font-bold flex items-center gap-3 animate-slide-up {{ colors.get(category, 'bg-zinc-800 border-zinc-700 text-zinc-300') }}">
+            <span class="w-2 h-2 rounded-full bg-current"></span>
             {{ message }}
           </div>
         {% endfor %}
@@ -130,13 +206,36 @@
     {% endwith %}
 
     {# Content #}
-    <main class="flex-1 overflow-y-auto p-6">
+    <main class="flex-1 overflow-y-auto p-6 lg:p-10 animate-fade-in">
       {% block content %}{% endblock %}
     </main>
   </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+<script>
+  // Mobile Sidebar Toggle
+  const sidebar = document.getElementById('admin-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  const openBtn = document.getElementById('open-sidebar');
+  const closeBtn = document.getElementById('close-sidebar');
+
+  const toggleSidebar = (state) => {
+    if (state) {
+      sidebar.classList.remove('closed');
+      overlay.classList.remove('hidden');
+      setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+    } else {
+      sidebar.classList.add('closed');
+      overlay.classList.add('opacity-0');
+      setTimeout(() => overlay.classList.add('hidden'), 300);
+    }
+  };
+
+  openBtn.addEventListener('click', () => toggleSidebar(true));
+  closeBtn.addEventListener('click', () => toggleSidebar(false));
+  overlay.addEventListener('click', () => toggleSidebar(false));
+</script>
 {% block extra_scripts %}{% endblock %}
 </body>
 </html>

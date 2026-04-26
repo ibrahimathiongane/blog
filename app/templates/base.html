@@ -2,12 +2,66 @@
 <html lang="fr">
 <head>
   <script>
-    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    function applyTheme() {
+      const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
+    applyTheme();
   </script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-surface: #fafafa;
+      --bg-subtle: #f4f4f5;
+      --text: #09090b;
+      --text-muted: #71717a;
+      --accent: #6366f1;
+      --accent-bg: #eef2ff;
+      --border: #e4e4e7;
+    }
+
+    [data-theme="dark"] {
+      --bg: #09090b;
+      --bg-surface: #121214;
+      --bg-subtle: #18181b;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --accent: #818cf8;
+      --accent-bg: #1e1b4b;
+      --border: #27272a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      scroll-behavior: smooth;
+    }
+
+    .glass {
+      background: rgba(var(--bg-rgb, 255, 255, 255), 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .dark .glass {
+      background: rgba(9, 9, 11, 0.7);
+    }
+    
+    .prose-comment {
+      word-break: break-word;
+    }
+    .prose-comment p {
+      margin-bottom: 0.75rem;
+    }
+    .prose-comment p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
@@ -34,7 +88,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-  {# ── TailwindCSS Play CDN ── #}
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -46,21 +99,42 @@
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            brand: {
-              50:  '#eef2ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              300: '#a5b4fc',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#312e81',
+            zinc: {
+              950: '#09090b',
             },
+            brand: {
+              50:  '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8',
+              500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81',
+            },
+            bg: 'var(--bg)',
+            surface: 'var(--bg-surface)',
+            subtle: 'var(--bg-subtle)',
+            muted: 'var(--text-muted)',
+            accent: 'var(--accent)',
+            'accent-bg': 'var(--accent-bg)',
+            border: 'var(--border)',
           },
-          typography: {
-            DEFAULT: { css: { maxWidth: '72ch' } },
+          textColor: {
+            DEFAULT: 'var(--text)',
+          },
+          boxShadow: {
+            'premium': '0 10px 30px -10px rgba(0, 0, 0, 0.1)',
+            'premium-dark': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+            'glow': '0 0 20px -5px var(--accent)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+            'slide-up': 'slideUp 0.5s ease-out forwards',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
           },
         },
       },
@@ -78,36 +152,45 @@
 <body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
 
   {# ── Navigation ── #}
-  <header class="sticky top-0 z-50 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
+  <header class="sticky top-0 z-50 border-b border-border glass">
     <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="{{ url_for('main.index') }}" class="flex items-center gap-2 group">
-        <span class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm group-hover:bg-brand-500 transition-colors">
+        <span class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm group-hover:scale-110 group-hover:rotate-3 transition-transform">
           {{ blog_author[0] | upper }}
         </span>
-        <span class="font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{{ blog_title }}</span>
+        <span class="font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors tracking-tight">{{ blog_title }}</span>
       </a>
 
-      <div class="hidden md:flex items-center gap-6">
+      <div class="hidden md:flex items-center gap-8">
         <a href="{{ url_for('main.index') }}"
-           class="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors {% if request.endpoint == 'main.index' %}text-zinc-900 dark:text-zinc-100{% endif %}">
+           class="text-sm font-medium text-muted hover:text-accent transition-colors {% if request.endpoint == 'main.index' %}text-accent{% endif %}">
           Articles
         </a>
         <a href="{{ url_for('main.projects') }}"
-           class="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors {% if request.endpoint == 'main.projects' %}text-zinc-900 dark:text-zinc-100{% endif %}">
+           class="text-sm font-medium text-muted hover:text-accent transition-colors {% if request.endpoint == 'main.projects' %}text-accent{% endif %}">
           Projets
         </a>
         <a href="{{ url_for('main.about') }}"
-           class="text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors {% if request.endpoint == 'main.about' %}text-zinc-900 dark:text-zinc-100{% endif %}">
+           class="text-sm font-medium text-muted hover:text-accent transition-colors {% if request.endpoint == 'main.about' %}text-accent{% endif %}">
           À propos
         </a>
-        
-        <button id="theme-toggle" class="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all" aria-label="Toggle Theme">
+        <form action="{{ url_for('main.search') }}" method="GET" class="relative group hidden sm:block">
+          <input type="text" name="q" placeholder="Rechercher..."
+                 class="w-40 lg:w-64 bg-subtle border border-border text-xs font-bold rounded-xl px-4 py-2 pl-10 focus:outline-none focus:border-accent transition-all placeholder:text-muted/40" />
+          <svg class="absolute left-3 top-2.5 w-4 h-4 text-muted group-focus-within:text-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </form>
+
+        <div class="h-4 w-px bg-border mx-1"></div>
+
+        <button id="theme-toggle" class="p-2 rounded-xl bg-subtle text-muted hover:text-accent hover:bg-accent/10 transition-all" aria-label="Toggle Theme">
           <svg class="sun-icon hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/></svg>
           <svg class="moon-icon hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/></svg>
         </button>
 
         <a href="{{ url_for('main.rss') }}"
-           class="text-xs text-zinc-500 hover:text-orange-400 transition-colors flex items-center gap-1"
+           class="text-xs text-muted hover:text-orange-500 transition-colors flex items-center gap-1"
            title="Flux RSS">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path d="M3.75 3a.75.75 0 000 1.5A11.25 11.25 0 0115 15.75a.75.75 0 001.5 0A12.75 12.75 0 003.75 3zM3.75 7.5a.75.75 0 000 1.5 6.75 6.75 0 016.75 6.75.75.75 0 001.5 0A8.25 8.25 0 003.75 7.5zM5.25 15a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
@@ -125,10 +208,10 @@
     </nav>
 
     {# Mobile menu #}
-    <div id="mobile-menu" class="hidden md:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-4 flex flex-col gap-4">
-      <a href="{{ url_for('main.index') }}" class="text-sm text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white">Articles</a>
-      <a href="{{ url_for('main.projects') }}" class="text-sm text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white">Projets</a>
-      <a href="{{ url_for('main.about') }}" class="text-sm text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white">À propos</a>
+    <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-surface px-4 py-4 flex flex-col gap-4">
+      <a href="{{ url_for('main.index') }}" class="text-sm text-muted hover:text-accent">Articles</a>
+      <a href="{{ url_for('main.projects') }}" class="text-sm text-muted hover:text-accent">Projets</a>
+      <a href="{{ url_for('main.about') }}" class="text-sm text-muted hover:text-accent">À propos</a>
     </div>
   </header>
 
@@ -155,15 +238,15 @@
   </main>
 
   {# ── Footer ── #}
-  <footer class="border-t border-zinc-200 dark:border-zinc-800 mt-20">
+  <footer class="border-t border-border mt-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
-      <p class="text-sm text-zinc-500">
-        © {{ now.year if now else 2026 }} <span class="text-zinc-700 dark:text-zinc-400 font-medium">{{ blog_author }}</span>. Tous droits réservés.
+      <p class="text-sm text-muted">
+        © {{ now.year if now else 2026 }} <span class="font-medium opacity-80">{{ blog_author }}</span>. Tous droits réservés.
       </p>
-      <div class="flex items-center gap-4 text-zinc-500 text-sm">
-        <a href="{{ url_for('main.rss') }}" class="hover:text-orange-500 dark:hover:text-orange-400 transition-colors">RSS</a>
-        <a href="{{ url_for('main.sitemap') }}" class="hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors">Sitemap</a>
-        <a href="{{ url_for('admin_bp.login') }}" class="hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors">Admin</a>
+      <div class="flex items-center gap-4 text-muted text-sm">
+        <a href="{{ url_for('main.rss') }}" class="hover:text-orange-500 transition-colors">RSS</a>
+        <a href="{{ url_for('main.sitemap') }}" class="hover:text-accent transition-colors">Sitemap</a>
+        <a href="{{ url_for('admin_bp.login') }}" class="hover:text-accent transition-colors">Admin</a>
       </div>
     </div>
   </footer>
