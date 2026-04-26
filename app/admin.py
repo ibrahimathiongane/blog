@@ -224,16 +224,9 @@ def _project_from_form(form, proj):
 
 # ── Tags ──────────────────────────────────────────────────────────────────────
 
-@admin_bp.route("/tags")
+@admin_bp.route("/tags", methods=["GET", "POST"])
 @login_required
 def tags_list():
-    tags = Tag.query.order_by(Tag.name).all()
-    return render_template("admin/tags.html", tags=tags, title="Tags")
-
-
-@admin_bp.route("/tags/new", methods=["GET", "POST"])
-@login_required
-def tag_new():
     form = TagForm()
     if form.validate_on_submit():
         slug = form.slug.data.strip() or make_slug(form.name.data)
@@ -242,7 +235,11 @@ def tag_new():
         db.session.commit()
         flash(f'Tag "{tag.name}" créé.', "success")
         return redirect(url_for("admin_bp.tags_list"))
-    return render_template("admin/tag_form.html", form=form, title="Nouveau tag")
+    
+    tags = Tag.query.order_by(Tag.name).all()
+    return render_template("admin/tags.html", tags=tags, form=form, title="Tags")
+
+
 
 
 @admin_bp.route("/tags/<int:id>/edit", methods=["GET", "POST"])
@@ -272,16 +269,9 @@ def tag_delete(id):
 
 # ── Categories ────────────────────────────────────────────────────────────────
 
-@admin_bp.route("/categories")
+@admin_bp.route("/categories", methods=["GET", "POST"])
 @login_required
 def categories_list():
-    cats = Category.query.order_by(Category.name).all()
-    return render_template("admin/categories.html", categories=cats, title="Catégories")
-
-
-@admin_bp.route("/categories/new", methods=["GET", "POST"])
-@login_required
-def category_new():
     form = CategoryForm()
     if form.validate_on_submit():
         slug = form.slug.data.strip() or make_slug(form.name.data)
@@ -290,7 +280,11 @@ def category_new():
         db.session.commit()
         flash(f'Catégorie "{cat.name}" créée.', "success")
         return redirect(url_for("admin_bp.categories_list"))
-    return render_template("admin/category_form.html", form=form, title="Nouvelle catégorie")
+
+    cats = Category.query.order_by(Category.name).all()
+    return render_template("admin/categories.html", categories=cats, form=form, title="Catégories")
+
+
 
 
 @admin_bp.route("/categories/<int:id>/edit", methods=["GET", "POST"])

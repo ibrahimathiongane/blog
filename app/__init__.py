@@ -21,7 +21,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 def create_app(config_name="default"):
-    app = Flask(__name__, instance_relative_config=False)
+    app = Flask(__name__, instance_relative_config=False, static_folder="../static")
     app.config.from_object(config[config_name])
 
     # Init extensions

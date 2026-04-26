@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Modifier la catégorie{% endblock %}
+
+{% block content %}
+<div class="flex items-center gap-4 mb-6">
+  <a href="{{ url_for('admin_bp.categories_list') }}" class="text-sm text-zinc-500 hover:text-zinc-300 transition-colors">← Catégories</a>
+</div>
+<div class="max-w-md">
+  <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+    <h2 class="text-sm font-semibold text-zinc-300 mb-5">Modifier la catégorie</h2>
+    <form method="POST" novalidate class="space-y-4">
+      {{ form.hidden_tag() }}
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Nom *</label>
+        {{ form.name(id='cat-name', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors') }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Description</label>
+        {{ form.description(id='cat-desc', rows=3, class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors resize-none') }}
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-zinc-500 mb-2">Slug</label>
+        {{ form.slug(id='cat-slug', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500 transition-colors') }}
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl text-sm transition-colors">Enregistrer</button>
+        <a href="{{ url_for('admin_bp.categories_list') }}" class="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm transition-colors">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

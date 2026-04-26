@@ -1,6 +1,13 @@
 <!DOCTYPE html>
-<html lang="fr" class="dark">
+<html lang="fr">
 <head>
+  <script>
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion Admin — {{ blog_title }}</title>
@@ -8,7 +15,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { brand: { 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca' } } } } }</script>
 </head>
-<body class="bg-zinc-950 font-sans antialiased flex items-center justify-center min-h-screen">
+<body class="bg-zinc-50 dark:bg-zinc-950 font-sans antialiased flex items-center justify-center min-h-screen transition-colors duration-300">
   <div class="w-full max-w-md px-4">
     <div class="text-center mb-8">
       <div class="w-12 h-12 rounded-xl bg-brand-600 flex items-center justify-center text-white font-bold text-xl mx-auto mb-4">
@@ -18,12 +25,12 @@
       <p class="text-zinc-500 text-sm mt-1">{{ blog_title }}</p>
     </div>
 
-    <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 shadow-sm">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
           <div class="mb-4 px-4 py-3 rounded-xl border text-sm
-                      {% if category == 'danger' %}bg-red-900/50 border-red-700 text-red-300{% else %}bg-zinc-800 border-zinc-700 text-zinc-300{% endif %}">
+                      {% if category == 'danger' %}bg-red-50 dark:bg-red-900/50 border-red-200 dark:border-red-700 text-red-600 dark:text-red-300{% else %}bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300{% endif %}">
             {{ message }}
           </div>
           {% endfor %}
@@ -33,19 +40,19 @@
       <form method="POST" action="{{ url_for('admin_bp.login') }}" novalidate>
         {{ form.hidden_tag() }}
         <div class="mb-5">
-          <label for="username" class="block text-sm font-medium text-zinc-400 mb-2">
+          <label for="username" class="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
             Nom d'utilisateur
           </label>
-          {{ form.username(id='username', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors placeholder:text-zinc-600', placeholder='admin') }}
+          {{ form.username(id='username', class='w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors placeholder:text-zinc-400 dark:placeholder:text-zinc-600', placeholder='admin') }}
           {% if form.username.errors %}
             <p class="text-red-400 text-xs mt-1">{{ form.username.errors[0] }}</p>
           {% endif %}
         </div>
         <div class="mb-6">
-          <label for="password" class="block text-sm font-medium text-zinc-400 mb-2">
+          <label for="password" class="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-2">
             Mot de passe
           </label>
-          {{ form.password(id='password', class='w-full bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors placeholder:text-zinc-600', placeholder='••••••••') }}
+          {{ form.password(id='password', class='w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/50 transition-colors placeholder:text-zinc-400 dark:placeholder:text-zinc-600', placeholder='••••••••') }}
           {% if form.password.errors %}
             <p class="text-red-400 text-xs mt-1">{{ form.password.errors[0] }}</p>
           {% endif %}
