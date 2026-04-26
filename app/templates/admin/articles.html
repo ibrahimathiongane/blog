@@ -1,0 +1,94 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Articles{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div></div>
+  <a href="{{ url_for('admin_bp.article_new') }}"
+     class="flex items-center gap-2 px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-medium transition-colors">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+    </svg>
+    Nouvel article
+  </a>
+</div>
+
+<div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+  {% if articles.items %}
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-zinc-800">
+        <th class="text-left px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Titre</th>
+        <th class="text-left px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden sm:table-cell">Catégorie</th>
+        <th class="text-left px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden md:table-cell">Statut</th>
+        <th class="text-left px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden lg:table-cell">Date</th>
+        <th class="text-left px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider hidden lg:table-cell">Vues</th>
+        <th class="text-right px-5 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-zinc-800">
+      {% for art in articles.items %}
+      <tr class="hover:bg-zinc-800/50 transition-colors group">
+        <td class="px-5 py-3 text-zinc-200 font-medium max-w-xs">
+          <div class="truncate">{{ art.title }}</div>
+          <div class="text-xs text-zinc-600 font-mono truncate">/blog/{{ art.slug }}</div>
+        </td>
+        <td class="px-5 py-3 hidden sm:table-cell text-zinc-400 text-xs">
+          {{ art.category.name if art.category else '—' }}
+        </td>
+        <td class="px-5 py-3 hidden md:table-cell">
+          {% if art.is_published %}
+          <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-900/50 border border-emerald-800 text-emerald-400">Publié</span>
+          {% else %}
+          <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400">Brouillon</span>
+          {% endif %}
+        </td>
+        <td class="px-5 py-3 text-zinc-500 text-xs hidden lg:table-cell">
+          {{ art.published_at.strftime('%d %b %Y') if art.published_at else '—' }}
+        </td>
+        <td class="px-5 py-3 text-zinc-500 text-xs hidden lg:table-cell">{{ art.views }}</td>
+        <td class="px-5 py-3 text-right">
+          <div class="flex items-center justify-end gap-3">
+            {% if art.is_published %}
+            <a href="{{ url_for('main.article', slug=art.slug) }}" target="_blank"
+               class="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">Voir</a>
+            {% endif %}
+            <a href="{{ url_for('admin_bp.article_edit', id=art.id) }}"
+               class="text-xs text-brand-400 hover:text-brand-300 transition-colors">Modifier</a>
+            <form method="POST" action="{{ url_for('admin_bp.article_delete', id=art.id) }}"
+                  onsubmit="return confirm('Supprimer cet article ?')">
+              {{ csrf_token() if csrf_token is defined }}
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="text-xs text-zinc-600 hover:text-red-400 transition-colors">Supprimer</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# Pagination #}
+  {% if articles.pages > 1 %}
+  <div class="px-5 py-4 border-t border-zinc-800 flex justify-between items-center text-xs text-zinc-500">
+    <span>{{ articles.total }} articles au total</span>
+    <div class="flex gap-2">
+      {% if articles.has_prev %}
+      <a href="{{ url_for('admin_bp.articles', page=articles.prev_num) }}"
+         class="px-3 py-1.5 border border-zinc-700 rounded-lg hover:border-brand-600 hover:text-brand-400 transition-colors">←</a>
+      {% endif %}
+      {% if articles.has_next %}
+      <a href="{{ url_for('admin_bp.articles', page=articles.next_num) }}"
+         class="px-3 py-1.5 border border-zinc-700 rounded-lg hover:border-brand-600 hover:text-brand-400 transition-colors">→</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="px-5 py-16 text-center text-zinc-500">
+    Aucun article. <a href="{{ url_for('admin_bp.article_new') }}" class="text-brand-400 hover:text-brand-300">Créer le premier →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
