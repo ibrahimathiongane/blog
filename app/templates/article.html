@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block page_title %}{{ article.effective_meta_title }} — {{ blog_title }}{% endblock %}
+{% block meta_description %}{{ article.effective_meta_description }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ article.title }}{% endblock %}
+{% block og_description %}{{ article.summary }}{% endblock %}
+{% if article.cover_image %}
+{% block og_image %}<meta property="og:image" content="{{ article.cover_image }}" />{% endblock %}
+{% endif %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ article.title | e }}",
+  "description": "{{ article.summary | e }}",
+  "datePublished": "{{ article.published_at.isoformat() if article.published_at else '' }}",
+  "author": { "@type": "Person", "name": "{{ blog_author | e }}" }
+  {% if article.cover_image %},"image": "{{ article.cover_image | e }}"{% endif %}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="flex gap-12 items-start">
+
+    {# ── Article ── #}
+    <article class="flex-1 min-w-0">
+
+      {# Back link #}
+      <a href="{{ url_for('main.index') }}" class="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-brand-400 transition-colors mb-8">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Retour aux articles
+      </a>
+
+      {# Cover image #}
+      {% if article.cover_image %}
+      <div class="mb-8 rounded-2xl overflow-hidden">
+        <img src="{{ article.cover_image }}" alt="{{ article.title }}"
+             class="w-full h-64 sm:h-80 object-cover" loading="lazy" />
+      </div>
+      {% endif %}
+
+      {# Category + tags #}
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        {% if article.category %}
+        <a href="{{ url_for('main.category', slug=article.category.slug) }}"
+           class="text-xs font-semibold text-brand-400 hover:text-brand-300 uppercase tracking-widest">
+          {{ article.category.name }}
+        </a>
+        <span class="text-zinc-700">·</span>
+        {% endif %}
+        {% for tag in article.tags %}
+        <a href="{{ url_for('main.tag', slug=tag.slug) }}"
+           class="text-xs px-2 py-0.5 rounded-full border font-medium transition-colors hover:opacity-80"
+           style="color: {{ tag.color }}; border-color: {{ tag.color }}44; background-color: {{ tag.color }}11;">
+          {{ tag.name }}
+        </a>
+        {% endfor %}
+      </div>
+
+      {# Title #}
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight mb-4">
+        {{ article.title }}
+      </h1>
+
+      {# Meta #}
+      <div class="flex flex-wrap items-center gap-4 text-sm text-zinc-500 mb-8 pb-8 border-b border-zinc-800">
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          {{ blog_author }}
+        </span>
+        {% if article.published_at %}
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <time datetime="{{ article.published_at.isoformat() }}">
+            {{ article.published_at.strftime('%d %B %Y') }}
+          </time>
+        </span>
+        {% endif %}
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {{ article.read_time }} min de lecture
+        </span>
+        <span class="flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          {{ article.views }} vues
+        </span>
+      </div>
+
+      {# ── Markdown Content ── #}
+      <div class="prose-article">
+        {{ content | safe }}
+      </div>
+
+      {# ── Share ── #}
+      <div class="mt-12 pt-8 border-t border-zinc-800">
+        <p class="text-sm text-zinc-500 mb-3">Partager cet article :</p>
+        <div class="flex items-center gap-3">
+          <a href="https://twitter.com/intent/tweet?text={{ article.title | urlencode }}&url={{ request.url | urlencode }}"
+             target="_blank" rel="noopener noreferrer"
+             class="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-zinc-300 hover:text-white transition-colors">
+            𝕏 Twitter
+          </a>
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url | urlencode }}"
+             target="_blank" rel="noopener noreferrer"
+             class="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-zinc-300 hover:text-white transition-colors">
+            LinkedIn
+          </a>
+          <button id="copy-url-btn"
+                  data-url="{{ request.url }}"
+                  class="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-sm text-zinc-300 hover:text-white transition-colors">
+            🔗 Copier le lien
+          </button>
+        </div>
+      </div>
+    </article>
+
+    {# ── TOC Sidebar (desktop) ── #}
+    <aside class="hidden xl:block w-56 flex-shrink-0 sticky top-24">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+        <h3 class="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-4">Dans cet article</h3>
+        <div id="toc-container" class="text-sm text-zinc-500 space-y-2">
+          {# Filled by JS from headings #}
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

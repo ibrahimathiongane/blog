@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  {# ── SEO ── #}
+  <title>{% block page_title %}{{ title }} — {{ blog_title }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ blog_description }}{% endblock %}" />
+  <meta name="author" content="{{ blog_author }}" />
+  <link rel="canonical" href="{% block canonical %}{{ request.url }}{% endblock %}" />
+
+  {# ── OpenGraph ── #}
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}" />
+  <meta property="og:title" content="{% block og_title %}{{ title }} — {{ blog_title }}{% endblock %}" />
+  <meta property="og:description" content="{% block og_description %}{{ blog_description }}{% endblock %}" />
+  <meta property="og:url" content="{{ request.url }}" />
+  {% block og_image %}<meta property="og:image" content="/static/img/og-default.png" />{% endblock %}
+
+  {# ── Twitter Card ── #}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{% block tw_title %}{{ title }} — {{ blog_title }}{% endblock %}" />
+  <meta name="twitter:description" content="{% block tw_description %}{{ blog_description }}{% endblock %}" />
+
+  {# ── Fonts ── #}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  {# ── TailwindCSS Play CDN ── #}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50:  '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            },
+          },
+          typography: {
+            DEFAULT: { css: { maxWidth: '72ch' } },
+          },
+        },
+      },
+    }
+  </script>
+
+  {# ── Custom CSS ── #}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+
+  {# ── RSS auto-discovery ── #}
+  <link rel="alternate" type="application/rss+xml" title="{{ blog_title }}" href="{{ url_for('main.rss') }}" />
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased min-h-screen flex flex-col">
+
+  {# ── Navigation ── #}
+  <header class="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="{{ url_for('main.index') }}" class="flex items-center gap-2 group">
+        <span class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold text-sm group-hover:bg-brand-500 transition-colors">
+          {{ blog_author[0] | upper }}
+        </span>
+        <span class="font-semibold text-zinc-100 group-hover:text-brand-400 transition-colors">{{ blog_title }}</span>
+      </a>
+
+      <div class="hidden md:flex items-center gap-6">
+        <a href="{{ url_for('main.index') }}"
+           class="text-sm text-zinc-400 hover:text-zinc-100 transition-colors {% if request.endpoint == 'main.index' %}text-zinc-100{% endif %}">
+          Articles
+        </a>
+        <a href="{{ url_for('main.projects') }}"
+           class="text-sm text-zinc-400 hover:text-zinc-100 transition-colors {% if request.endpoint == 'main.projects' %}text-zinc-100{% endif %}">
+          Projets
+        </a>
+        <a href="{{ url_for('main.about') }}"
+           class="text-sm text-zinc-400 hover:text-zinc-100 transition-colors {% if request.endpoint == 'main.about' %}text-zinc-100{% endif %}">
+          À propos
+        </a>
+        <a href="{{ url_for('main.rss') }}"
+           class="text-xs text-zinc-500 hover:text-orange-400 transition-colors flex items-center gap-1"
+           title="Flux RSS">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M3.75 3a.75.75 0 000 1.5A11.25 11.25 0 0115 15.75a.75.75 0 001.5 0A12.75 12.75 0 003.75 3zM3.75 7.5a.75.75 0 000 1.5 6.75 6.75 0 016.75 6.75.75.75 0 001.5 0A8.25 8.25 0 003.75 7.5zM5.25 15a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/>
+          </svg>
+          RSS
+        </a>
+      </div>
+
+      {# Mobile menu button #}
+      <button id="mobile-menu-btn" class="md:hidden text-zinc-400 hover:text-zinc-100 p-2" aria-label="Menu">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </nav>
+
+    {# Mobile menu #}
+    <div id="mobile-menu" class="hidden md:hidden border-t border-zinc-800 bg-zinc-950 px-4 py-4 flex flex-col gap-4">
+      <a href="{{ url_for('main.index') }}" class="text-sm text-zinc-300 hover:text-white">Articles</a>
+      <a href="{{ url_for('main.projects') }}" class="text-sm text-zinc-300 hover:text-white">Projets</a>
+      <a href="{{ url_for('main.about') }}" class="text-sm text-zinc-300 hover:text-white">À propos</a>
+    </div>
+  </header>
+
+  {# ── Flash messages ── #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full">
+        {% for category, message in messages %}
+          {% set colors = {'success': 'bg-emerald-900/50 border-emerald-700 text-emerald-300',
+                           'danger':  'bg-red-900/50 border-red-700 text-red-300',
+                           'warning': 'bg-amber-900/50 border-amber-700 text-amber-300',
+                           'info':    'bg-blue-900/50 border-blue-700 text-blue-300'} %}
+          <div class="mb-2 px-4 py-3 rounded-lg border text-sm flex items-center gap-2 {{ colors.get(category, 'bg-zinc-800 border-zinc-700 text-zinc-300') }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {# ── Main content ── #}
+  <main class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  {# ── Footer ── #}
+  <footer class="border-t border-zinc-800 mt-20">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-zinc-500">
+        © {{ now.year if now else 2026 }} <span class="text-zinc-400">{{ blog_author }}</span>. Tous droits réservés.
+      </p>
+      <div class="flex items-center gap-4 text-zinc-500 text-sm">
+        <a href="{{ url_for('main.rss') }}" class="hover:text-orange-400 transition-colors">RSS</a>
+        <a href="{{ url_for('main.sitemap') }}" class="hover:text-zinc-300 transition-colors">Sitemap</a>
+        <a href="{{ url_for('admin_bp.login') }}" class="hover:text-zinc-300 transition-colors">Admin</a>
+      </div>
+    </div>
+  </footer>
+
+  {# ── Scripts ── #}
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {% for page in static_pages %}
+  <url>
+    <loc>{{ page.loc }}</loc>
+    <changefreq>{{ page.changefreq }}</changefreq>
+    <priority>{{ page.priority }}</priority>
+  </url>
+  {% endfor %}
+  {% for article in articles %}
+  <url>
+    <loc>{{ base_url }}/blog/{{ article.slug }}</loc>
+    <lastmod>{{ (article.updated_at or article.published_at).strftime('%Y-%m-%d') if (article.updated_at or article.published_at) else '' }}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  {% endfor %}
+  {% for project in projects %}
+  <url>
+    <loc>{{ base_url }}/projets</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  {% endfor %}
+</urlset>

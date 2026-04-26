@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block page_title %}Admin{% endblock %} — {{ blog_title }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: { 400:'#818cf8', 500:'#6366f1', 600:'#4f46e5', 700:'#4338ca', 900:'#312e81' },
+          },
+        },
+      },
+    }
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans antialiased">
+
+<div class="flex h-screen overflow-hidden">
+
+  {# ── Sidebar ── #}
+  <aside class="w-60 flex-shrink-0 bg-zinc-900 border-r border-zinc-800 flex flex-col">
+    <div class="h-16 flex items-center px-5 border-b border-zinc-800">
+      <a href="{{ url_for('main.index') }}" class="flex items-center gap-2 group">
+        <span class="w-7 h-7 rounded-md bg-brand-600 flex items-center justify-center text-white font-bold text-xs">
+          {{ blog_author[0] | upper }}
+        </span>
+        <span class="font-semibold text-sm text-zinc-200">Admin</span>
+      </a>
+    </div>
+
+    <nav class="flex-1 px-3 py-4 overflow-y-auto">
+      {% set nav_items = [
+        ('admin_bp.dashboard', 'Dashboard', 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'),
+        ('admin_bp.articles', 'Articles', 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'),
+        ('admin_bp.projects_list', 'Projets', 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'),
+        ('admin_bp.tags_list', 'Tags', 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'),
+        ('admin_bp.categories_list', 'Catégories', 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'),
+      ] %}
+      {% for endpoint, label, icon_path in nav_items %}
+      <a href="{{ url_for(endpoint) }}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-1 transition-all
+                {% if request.endpoint == endpoint %}
+                  bg-brand-600/20 text-brand-400 border border-brand-800/50
+                {% else %}
+                  text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800
+                {% endif %}">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ icon_path }}"/>
+        </svg>
+        {{ label }}
+      </a>
+      {% endfor %}
+    </nav>
+
+    <div class="p-3 border-t border-zinc-800">
+      <a href="{{ url_for('main.index') }}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-all mb-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+        </svg>
+        Voir le blog
+      </a>
+      <a href="{{ url_for('admin_bp.logout') }}"
+         class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-zinc-500 hover:text-red-400 hover:bg-red-900/20 transition-all">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Déconnexion
+      </a>
+    </div>
+  </aside>
+
+  {# ── Main area ── #}
+  <div class="flex-1 flex flex-col overflow-hidden">
+    {# Top bar #}
+    <header class="h-16 flex items-center justify-between px-6 border-b border-zinc-800 bg-zinc-950/60 backdrop-blur-sm flex-shrink-0">
+      <h1 class="text-base font-semibold text-zinc-200">{% block header_title %}{{ title }}{% endblock %}</h1>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-zinc-600">Connecté</span>
+        <div class="w-7 h-7 rounded-full bg-brand-700 flex items-center justify-center text-white text-xs font-bold">
+          {{ blog_author[0] | upper }}
+        </div>
+      </div>
+    </header>
+
+    {# Flash messages #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="px-6 pt-4">
+        {% for category, message in messages %}
+          {% set colors = {'success': 'bg-emerald-900/50 border-emerald-700 text-emerald-300',
+                           'danger':  'bg-red-900/50 border-red-700 text-red-300',
+                           'warning': 'bg-amber-900/50 border-amber-700 text-amber-300',
+                           'info':    'bg-blue-900/50 border-blue-700 text-blue-300'} %}
+          <div class="mb-2 px-4 py-3 rounded-xl border text-sm {{ colors.get(category, 'bg-zinc-800 border-zinc-700 text-zinc-300') }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    {# Content #}
+    <main class="flex-1 overflow-y-auto p-6">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>
