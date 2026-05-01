@@ -22,7 +22,7 @@ def _published_articles():
 # ── Public routes ─────────────────────────────────────────────────────────────
 
 @main_bp.route("/")
-@cache.cached(timeout=120)
+@cache.cached(timeout=120, query_string=True)
 def index():
     page = request.args.get("page", 1, type=int)
     articles = _published_articles().paginate(page=page, per_page=ARTICLES_PER_PAGE, error_out=False)

@@ -10,4 +10,4 @@ os.environ.setdefault('FLASK_ENV', 'production')
 from app import create_app
 
 # PlanetHoster (via Passenger) cherche un objet nommé 'application'
-application = create_app('production')
+application = create_app('default')

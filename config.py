@@ -15,7 +15,7 @@ class Config:
     UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
     # Blog meta
-    BLOG_TITLE = os.environ.get("BLOG_TITLE", "nexatech-sn")
+    BLOG_TITLE = os.environ.get("BLOG_TITLE", "Nexatech Engineering")
     BLOG_DESCRIPTION = os.environ.get(
         "BLOG_DESCRIPTION",
         "Articles techniques, projets et réflexions sur le développement logiciel.",
