@@ -31,7 +31,8 @@ def seed():
             ("Backend", "Python, Rust, Architecture API et Bases de données."),
             ("DevOps", "CI/CD, Docker, Kubernetes et Cloud."),
             ("Intelligence Artificielle", "LLMs, Machine Learning et Automatisation."),
-            ("Carrière", "Conseils pour les développeurs et Productivité.")
+            ("Carrière", "Conseils pour les développeurs et Productivité."),
+            ("Architecture", "Conception logicielle, microservices et patterns.")
         ]
         categories = []
         for name, desc in cat_data:
@@ -119,7 +120,7 @@ def seed():
                 slug=make_slug(title),
                 content=content,
                 summary=f"Un aperçu passionnant sur {title.lower()}. Découvrez les meilleures pratiques et astuces.",
-                category=[c for c in categories if c.name == cat_name][0],
+                category=next((c for c in categories if c.name == cat_name), categories[0]),
                 cover_image=f"https://images.unsplash.com/photo-{1600000000000 + i*1111}?auto=format&fit=crop&w=1200&q=80",
                 is_published=True,
                 published_at=pub_date,
@@ -127,8 +128,8 @@ def seed():
                 read_time=estimate_read_time(content),
                 views=random.randint(50, 1500)
             )
-            art.tags = [t for t in tags if t.name in tag_names]
             db.session.add(art)
+            art.tags = [t for t in tags if t.name in tag_names]
             articles.append(art)
         db.session.commit()
 
