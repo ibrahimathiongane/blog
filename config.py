@@ -15,13 +15,13 @@ class Config:
     UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
     # Blog meta
-    BLOG_TITLE = os.environ.get("BLOG_TITLE", "Mon Blog Tech")
+    BLOG_TITLE = os.environ.get("BLOG_TITLE", "nexatech-sn")
     BLOG_DESCRIPTION = os.environ.get(
         "BLOG_DESCRIPTION",
         "Articles techniques, projets et réflexions sur le développement logiciel.",
     )
-    BLOG_AUTHOR = os.environ.get("BLOG_AUTHOR", "Développeur")
-    BLOG_URL = os.environ.get("BLOG_URL", "http://localhost:5000")
+    BLOG_AUTHOR = os.environ.get("BLOG_AUTHOR", "Ibrahima Thiongane")
+    BLOG_URL = os.environ.get("BLOG_URL", "https://blog.nexatech-sn.online")
     RATELIMIT_DEFAULT = "200 per day;50 per hour"
     RATELIMIT_STORAGE_URL = "memory://"
 
